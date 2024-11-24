@@ -1,0 +1,11 @@
+django
+djangorestframework
+django-filter
+django-cors-headers
+celery
+django_celery_results
+django_celery_beat
+ptvsd
+tzdata
+selenium
+webdriver_manager

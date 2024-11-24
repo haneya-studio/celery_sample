@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  django:
+    build:
+      context: ./api/
+      dockerfile: ./Dockerfile
+    container_name: travel-django
+    ports:
+      - '8080:8080'
+    volumes: 
+      - ./api/mysite:/var/web/mysite/
+
+  redis:
+    image: redis:alpine
+    container_name: travel-redis
+    ports:
+      - "6400:6400"  # ホストの6400ポートをコンテナの6400ポートにマッピング
+    command: ["redis-server", "--port", "6400"]  # Redisサーバーを6400ポートで起動
+
+  celery:
+    build:
+      context: ./celery/
+      dockerfile: ./worker/Dockerfile
+    container_name: travel-celery
+    depends_on:
+      - redis
+      - django
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6400/0
+    volumes: 
+      - ./api/mysite:/app
+
+  celery_beat:
+    build:
+      context: ./celery/
+      dockerfile: ./beat/Dockerfile
+    container_name: travel-celery_beat
+    depends_on:
+      - redis
+      - celery
+      - django
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6400/0
+    volumes: 
+      - ./api/mysite:/app
+
+
